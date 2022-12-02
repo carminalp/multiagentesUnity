@@ -5,17 +5,16 @@ using UnityEngine.Networking;
 using SimpleJSON;
 using UnityEngine.UI;
 using TMPro;
-
-
+using Newtonsoft.Json;
+using System.Text;
+using System;
 
 public class ApiController : MonoBehaviour
 {
     public GameObject PrefabCarro;
+    public trafficLight light0, light1, light2, light3;
 
-    List<List<Vector3> > positions;
-
-    [System.Serializable]
-    public class Car
+    /*public class Car
     {
         public int id;
         public int posX;
@@ -29,15 +28,33 @@ public class ApiController : MonoBehaviour
     public class CarList
     {
         public Car[] car;
+    }*/
+
+
+    [System.Serializable]
+    public class TrafficL
+    {
+        public int id { get; set; }
+        public bool state { get; set; }
+        public int step { get; set; }
     }
+
+    [System.Serializable]
+    public class TrafficList
+    {
+        //public TrafficL[] traffic;
+        public TrafficL[] traffic { get; set; }
+    }
+
+    public TrafficList trafficList = new TrafficList();
 
     private readonly string baseAPIURL = "http://localhost:8585";
 
     //Get Car and Traffic Info
-    IEnumerator GetCarAtIndex()
+    IEnumerator getAPI()
     {
         //Info del carro
-        string carURL = baseAPIURL + "/car";
+        /*string carURL = baseAPIURL + "/car";
 
         UnityWebRequest carInfoRequest = UnityWebRequest.Get(carURL);
 
@@ -51,9 +68,6 @@ public class ApiController : MonoBehaviour
 
         JSONNode Info = JSON.Parse(carInfoRequest.downloadHandler.text);
 
-
-
-
         for(int i=0; i<Info.Count ; i++){
             Instantiate(PrefabCarro, new Vector3(-20*i,-10,0), Quaternion.identity);
             List<Vector3> newPositions = new List<Vector3>();
@@ -66,103 +80,71 @@ public class ApiController : MonoBehaviour
                 newPositions.Add(auxV);
             }
             positions.Add(newPositions);
-        }
+        }*/
 
-
-
-
-
-
-
-
-
-
-        /*
-        JSONNode carInfo = Info[];
-        for(int k=0; k<carInfo.Count ; k++){
-            List<Vector3> newPositions = new List<Vector3>();
-            Instantiate(PrefabCarro, new Vector3(-20*k,-10,0), Quaternion.identity);
-            for(int i=0; i<carInfo.Count ; i++){
-                int x = carInfo[i.ToString()]["x"];
-                int y = carInfo[i.ToString()]["y"];
-                int z = carInfo[i.ToString()]["z"];
-                Vector3 auxV = new Vector3(x, y, z);
-                newPositions.Add(auxV);
-            }
-            positions.Add(newPositions);
-        }
-        */
-
-        /*
-        int[][] jaggedArray = new int[Info.Count][];
-
-        for(int k=0; k<Info.Count ; k++){
-
-
-            JSONNode carInfo = Info[k.ToString()];
-            int[] carMoveX = new int[carInfo.Count];
-            int[] carMoveY = new int[carInfo.Count];
-            int[] carMoveZ = new int[carInfo.Count];
-
-            for (int i = 0, j = carInfo.Count - 1; i < carInfo.Count; i++, j--)
-            {
-                carMoveX[j] = carInfo[i.ToString()]["x"];
-                carMoveY[j] = carInfo[i.ToString()]["y"];
-                carMoveZ[j] = carInfo[i.ToString()]["z"];
-            }
-
-            //jaggedArray[k] = new int[1] carMoveX;
-
-        }
-        */
+        //Info del semaforo
         
-        /*
-        for(int i=0; i<Info.Count ; i++){
-            JSONNode carInfo = Info[i.ToString()];
-            Instantiate(PrefabCarro, new Vector3(-20*i,-10,0), Quaternion.identity);
-            for(int j=1; j<carInfo.Count ; j++){
-                JSONNode stepInfo = carInfo[i][j.ToString()];
-                for(int k=0; k<stepInfo.Count ; k++){
-                    int carX = stepInfo[j]["x"];
-                    int carY = stepInfo[j]["y"];
-                    int carZ = stepInfo[j]["z"];
-                    
-
-                    if(j==1){
-                        PrefabCarro.transform.position = new Vector3(carX*4, carY*4, carZ*4);
-                    }else if(j!=1){
-                        PrefabCarro.transform.position = Vector3.MoveTowards(transform.position,new Vector3(carX*4, carY*4, carZ*4),10);
-                    }
-                }
-
-            }
-        }
-        */
+        string trafficLightURL = baseAPIURL + "/trafficLight";
         
-        /*Info del Trafficlight
-        string trafficURL = baseAPIURL + "/trafficLight";
+        UnityWebRequest trafficLightRequest = UnityWebRequest.Get(trafficLightURL);
+        
+        yield return trafficLightRequest.SendWebRequest();
 
-        UnityWebRequest trafficInfoRequest = UnityWebRequest.Get(trafficURL);
-
-        yield return trafficInfoRequest.SendWebRequest();
-
-        if (trafficInfoRequest.isNetworkError || trafficInfoRequest.isHttpError)
+        if (trafficLightRequest.isNetworkError || trafficLightRequest.isHttpError)
         {
-            Debug.LogError(trafficInfoRequest.error);
+            Debug.LogError(trafficLightRequest.error);
             yield break;
         }
+        //JSONNode Info = JSON.Parse(trafficLightRequest.downloadHandler.text);
+        string Info = trafficLightRequest.downloadHandler.text;
+         
+        //trafficList = JsonUtility.FromJson<TrafficList>(Info);
+        trafficList = JsonConvert.DeserializeObject<TrafficList>(Info);
+        Debug.Log(trafficList);  
 
-        JSONNode trafficInfo = JSON.Parse(trafficInfoRequest.downloadHandler.text);
-        */ 
+        TrafficL[] trafficL = trafficList.traffic; 
+        //Debug.Log(trafficL[1].id); 
+
+        for(int i = 0; i < trafficL.Length; i++)
+        {
+             
+            /*int unique_id = trafficL[i].id;
+            Debug.Log(trafficL[i].id);  
+            bool state = trafficL[i].state;
+            
+            Debug.Log(state);
+
+            if(unique_id == 0)
+            {
+                light0.states.Add(state);
+            }
+
+            else if(unique_id == 1)
+            {
+                light1.states.Add(state);
+            }
+
+            else if (unique_id == 2)
+            {
+                light2.states.Add(state);
+            }
+
+            else if (unique_id == 3)
+            {
+                light3.states.Add(state);
+            }*/
+        }  
     }
 
 
     void Start()
     {
-        StartCoroutine(GetCarAtIndex());
+        StartCoroutine(getAPI());
     }
     void Update()
     {
 
     }
 }
+
+

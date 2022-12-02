@@ -366,6 +366,7 @@
 "Assets/Scripts/Waypoint.cs"
 "Assets/ScriptsFinal/instanciaNueva.cs"
 "Assets/ScriptsFinal/moveWaypoints.cs"
+"Assets/Script_TrafficLight/trafficLight.cs"
 -langversion:9.0
 
 /deterministic
