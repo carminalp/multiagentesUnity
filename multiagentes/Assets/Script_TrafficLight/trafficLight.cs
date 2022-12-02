@@ -33,8 +33,8 @@ public class trafficLight : MonoBehaviour
     }
 
     private void changeColor(){
-        state = states[lightCount + 1];
-        if (lightCount + 1 < states.Count - 1){
+        state = states[lightCount];
+        if (lightCount < states.Count - 1){
             lightCount++;
         }
     }
